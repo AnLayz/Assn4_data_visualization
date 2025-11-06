@@ -25,7 +25,7 @@ prometheus-monitoring/
 └── README.md # Documentation (this file)
 
 yaml
-Копировать код
+
 
 ---
 
@@ -99,7 +99,7 @@ $city — allows dynamic city selection in Grafana.
 PromQL examples:
 
 promql
-Копировать код
+
 weather_temperature_c{city=~"$city"}
 avg_over_time(weather_temperature_c{city=~"$city"}[6h])
 stddev_over_time(weather_wind_speed_ms{city=~"$city"}[30m])
@@ -108,7 +108,7 @@ clamp_min(weather_rain_1h_mm{city=~"$city"}, 0)
 High Wind Speed Alert
 
 promql
-Копировать код
+
 weather_wind_speed_ms{city=~"$city"} > 12
 Summary:
 High wind speed detected in {{ $labels.city }} (>12 m/s).
@@ -117,7 +117,7 @@ Severity: warning
 
 📦 Exporter — Python Code (custom_exporter.py)
 python
-Копировать код
+
 from prometheus_client import start_http_server, Gauge
 import requests, time, os
 
@@ -165,42 +165,14 @@ if __name__ == "__main__":
             except Exception as e:
                 print("Error:", e)
         time.sleep(20)
-📊 Requirements Checklist
-№	Requirement	Status
-1	Prometheus & Grafana running and connected	✅
-2	All exporters running (PostgreSQL / Windows / Custom)	✅
-3	≥10 PromQL queries per dashboard	✅
-4	≥60% queries with functions / grouping	✅
-5	All queries verified in Prometheus	✅
-6	Metrics collected for 1–5 hours	✅
-7	≥10 panels, ≥4 visualization types	✅
-8	Global dashboard variable	✅ ($instance, $volume, $city)
-9	Real-time data refresh works	✅
-10	At least one alert (wind speed)	✅
-11	Dashboard JSONs + configs in GitHub	✅
-12	Live demo: Targets “UP”, Grafana working	✅
 
-📸 Example Targets (Status: UP)
-Exporter	Endpoint	Status
-PostgreSQL Exporter	http://postgres_exporter:9187/metrics	✅ UP
-Windows Exporter	http://host.docker.internal:9182/metrics	✅ UP
-Custom Exporter	http://custom_exporter:8000/metrics	✅ UP
 
-👨‍💻 Author
-Anuar Totin
-IT-2306 | Astana IT University
-Course: Data Visualization & Monitoring
-Assignment #4 — Prometheus & Grafana
-November 2025
+
 
 ✅ All dashboards verified and visualized in Grafana (real-time updates every 20 seconds).
 
-yaml
-Копировать код
 
----
 
-Хочешь, я добавлю к этому README красивый ASCII-баннер в начале (например, `# 🚀 PROMETHEUS MONITORING STACK`) и вставлю инструкции по установке зависимостей Python для custom_exporter?
 
 
 
