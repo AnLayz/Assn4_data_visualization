@@ -1,0 +1,72 @@
+version: "3.9"
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app123
+      POSTGRES_DB: appdb
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d appdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    depends_on:
+      - postgres
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:1234@host.docker.internal:5433/fecomdb?sslmode=disable"
+    ports:
+      - "9187:9187"
+
+  node_exporter:
+    image: prom/node-exporter:v1.8.1
+    pid: "host"
+    network_mode: "host"   # удобнее для дисков/сетей
+    command:
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|run|var/lib/docker/.+)($$|/)'
+    restart: unless-stopped
+
+  custom_exporter:
+    build:
+      context: .
+      dockerfile: Dockerfile.custom_exporter
+    environment:
+      OPENWEATHER_API_KEY: ${OPENWEATHER_API_KEY}
+      OW_CITIES: "Astana,Almaty,London"
+      OW_INTERVAL_SEC: "20"
+      OW_UNITS: "metric"
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - postgres_exporter
+      - node_exporter
+      - custom_exporter
+
+  grafana:
+    image: grafana/grafana:11.2.0
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ./grafana/data:/var/lib/grafana
+    depends_on:
+      - prometheus
